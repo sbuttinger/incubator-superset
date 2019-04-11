@@ -1418,10 +1418,14 @@ class MssqlEngineSpec(BaseEngineSpec):
 
     @classmethod
     def fetch_data(cls, cursor, limit):
-        data = super(MssqlEngineSpec, cls).fetch_data(cursor, limit)
-        if len(data) != 0 and type(data[0]).__name__ == 'Row':
-            data = [[elem for elem in r] for r in data]
-        return data
+        import pyodbc
+        try:
+            data = super(MssqlEngineSpec, cls).fetch_data(cursor, limit)
+            if len(data) != 0 and type(data[0]).__name__ == 'Row':
+                data = [[elem for elem in r] for r in data]
+            return data
+        except pyodbc.ProgrammingError as e:
+            return []
 
     column_types = [
         (String(), re.compile(r'^(?<!N)((VAR){0,1}CHAR|TEXT|STRING)', re.IGNORECASE)),
